@@ -115,7 +115,9 @@ public class FileInfoQuery extends BaseParam {
     private String[] fileIdArray;
 
     private String[] filePidArray;
-
+    /**
+     * 排除的当前文件id
+     */
     private String[] excludeFileIdArray;
 
     private Boolean queryExpire;

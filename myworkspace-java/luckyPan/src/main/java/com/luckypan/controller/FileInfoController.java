@@ -5,6 +5,8 @@ import com.luckypan.common.annotation.GlobalInterceptor;
 import com.luckypan.common.annotation.VerifyParam;
 import com.luckypan.common.lang.eumns.FileCategoryEnums;
 import com.luckypan.common.lang.eumns.FileDelFlagEnums;
+import com.luckypan.common.lang.eumns.FileFolderTypeEnums;
+import com.luckypan.common.utils.StringTools;
 import com.luckypan.entity.Dto.SessionWebUserDto;
 import com.luckypan.entity.Dto.UploadResultDto;
 import com.luckypan.entity.FileInfo;
@@ -50,8 +52,7 @@ public class FileInfoController extends CommonFileController {
         query.setDelFlag(FileDelFlagEnums.USING.getFlag());// 获取正常的文件
         PaginationResultVO<FileInfo> result = fileInfoService.findListByPage(query);
         // 我们将结果返回数据优化，把一些需要的数据封装返回
-        ResponseVO successResponseVO = getSuccessResponseVO(convert2PaginationVO(result, FileInfoVO.class));
-        return successResponseVO;
+        return getSuccessResponseVO(convert2PaginationVO(result, FileInfoVO.class));
     }
 
     @RequestMapping("/uploadFile")
@@ -112,5 +113,25 @@ public class FileInfoController extends CommonFileController {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         FileInfo fileInfo = fileInfoService.rename(fileId, webUserDto.getUserId(), fileName);
         return getSuccessResponseVO(fileInfo);
+    }
+
+    @RequestMapping("/loadAllFolder")
+    @GlobalInterceptor(checkParams = true)
+    public ResponseVO loadAllFolder(
+            HttpSession session,
+            @VerifyParam(required = true) String filePid,
+            String currentFileIds) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        FileInfoQuery infoQuery = new FileInfoQuery();
+        infoQuery.setFilePid(filePid);
+        infoQuery.setUserId(webUserDto.getUserId());
+        if (!StringTools.isEmpty(currentFileIds)) {
+            infoQuery.setExcludeFileIdArray(currentFileIds.split(","));
+        }
+        infoQuery.setFolderType(FileFolderTypeEnums.FOLDER.getType());
+        infoQuery.setDelFlag(FileDelFlagEnums.USING.getFlag());
+        infoQuery.setOrderBy("create_time desc");
+        List<FileInfo> fileInfoList = fileInfoService.findListByParam(infoQuery);
+        return getSuccessResponseVO(fileInfoList);
     }
 }
