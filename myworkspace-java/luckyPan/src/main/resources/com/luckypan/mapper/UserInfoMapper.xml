@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luckypan.mapper.UserInfoMapper">
+
+    <resultMap id="userInfoMap" type="com.luckypan.entity.UserInfo">
+        <id property="userId" column="user_id"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="email" column="email"/>
+        <result property="qqOpenId" column="qq_open_id"/>
+        <result property="qqAvatar" column="qq_avatar"/>
+        <result property="password" column="password"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="status" column="status"/>
+        <result property="useSpace" column="use_space"/>
+        <result property="totalSpace" column="total_space"/>
+    </resultMap>
+
+    <select id="selectByEmail" resultMap="userInfoMap">
+        select * from user_info where email = #{email}
+    </select>
+    <select id="selectByNickName" resultType="com.luckypan.entity.UserInfo">
+        select * from user_info where nick_name = #{nickname}
+    </select>
+
+    <insert id="insert" parameterType="com.luckypan.entity.UserInfo">
+        insert into user_info(
+                              user_id,nick_name,email,qq_open_id,qq_avatar,password,
+                              register_time,last_login_time,status,use_space,total_space)
+        values(#{userId},#{nickName},#{email},#{qqOpenId},#{qqAvatar},#{password},
+               #{registerTime},#{lastLoginTime},#{status},#{useSpace},#{totalSpace})
+    </insert>
+
+    <update id="updateByUserId">
+        UPDATE user_info
+        <set>
+            <if test="updateInfo.nickName != null and updateInfo.nickName != ''">nick_name = #{updateInfo.nickName},</if>
+            <if test="updateInfo.email != null and updateInfo.email != ''">email = #{updateInfo.email},</if>
+            <if test="updateInfo.qqOpenId != null and updateInfo.qqOpenId != ''">qq_open_id = #{updateInfo.qqOpenId},</if>
+            <if test="updateInfo.qqAvatar != null">qq_avatar = #{updateInfo.qqAvatar},</if>
+            <if test="updateInfo.password != null and updateInfo.password != ''">password = #{updateInfo.password},</if>
+            <if test="updateInfo.registerTime != null">register_time = #{updateInfo.registerTime},</if>
+            <if test="updateInfo.lastLoginTime != null">last_login_time = #{updateInfo.lastLoginTime},</if>
+            <if test="updateInfo.status != null and updateInfo.status != ''">status = #{updateInfo.status},</if>
+            <if test="updateInfo.useSpace != null and updateInfo.useSpace != ''">use_space = #{updateInfo.useSpace},</if>
+            <if test="updateInfo.totalSpace != null and updateInfo.totalSpace != ''">total_space = #{updateInfo.totalSpace},</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="updateByEmail">
+        UPDATE user_info
+        <set>
+            <if test="updateInfo.nickName != null and updateInfo.nickName != ''">nick_name = #{updateInfo.nickName},</if>
+            <if test="updateInfo.qqOpenId != null and updateInfo.qqOpenId != ''">qq_open_id = #{updateInfo.qqOpenId},</if>
+            <if test="updateInfo.qqAvatar != null and updateInfo.qqAvatar != ''">qq_avatar = #{updateInfo.qqAvatar},</if>
+            <if test="updateInfo.password != null and updateInfo.password != ''">password = #{updateInfo.password},</if>
+            <if test="updateInfo.registerTime != null">register_time = #{updateInfo.registerTime},</if>
+            <if test="updateInfo.lastLoginTime != null">last_login_time = #{updateInfo.lastLoginTime},</if>
+            <if test="updateInfo.status != null and updateInfo.status != ''">status = #{updateInfo.status},</if>
+            <if test="updateInfo.useSpace != null and updateInfo.useSpace != ''">use_space = #{updateInfo.useSpace},</if>
+            <if test="updateInfo.totalSpace != null and updateInfo.totalSpace != ''">total_space = #{updateInfo.totalSpace},</if>
+        </set>
+        WHERE email = #{email}
+    </update>
+
+    <update id="updateUserSpace">
+        update user_info
+        <set>
+            <if test="useSpace != null">
+                use_space = use_space + #{useSpace},
+            </if>
+            <if test="totalSpace != null">
+                total_space = total_space + #{totalSpace},
+            </if>
+        </set>
+        where user_id = #{userId}
+        <if test="useSpace != null">
+            <![CDATA[ and (use_space + #{useSpace}) <= total_space ]]>
+        </if>
+        <if test="totalSpace != null">
+            <![CDATA[ and (total_space + #{totalSpace}) >= use_space ]]>
+        </if>
+    </update>
+</mapper>
